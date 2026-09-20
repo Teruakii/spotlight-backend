@@ -10,22 +10,26 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "*",
   }),
-)
+);
 
 app.use(express.json());
 app.use("/api", createRouter(container));
 app.use(errorHandler);
 
-const server = app.listen(process.env.PORT || 3000, () =>
-  console.log("Server running on port " + (process.env.PORT || 3000)),
-);
+if (require.main === module) {
+  const server = app.listen(process.env.PORT || 3000, () =>
+    console.log("Server running on port " + (process.env.PORT || 3000)),
+  );
 
-async function shutdown(signal) {
-  console.log(`${signal} received: closing server...`);
-  server.close(() => console.log("HTTP server closed"));
-  await container.prisma.$disconnect();
-  process.exit(0);
+  const shutdown = async (signal) => {
+    console.log(`${signal} received: closing server...`);
+    server.close(() => console.log("HTTP server closed"));
+    await container.prisma.$disconnect();
+    process.exit(0);
+  };
+
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
-process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("SIGTERM", () => shutdown("SIGTERM"));
+module.exports = app;
