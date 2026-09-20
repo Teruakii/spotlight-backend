@@ -1,14 +1,17 @@
-const { z } = require('zod');
-const { EmailAlreadyInUseError, InvalidUserDataError } = require('../errors/errors');
-const User = require('../entities/user');
+const { z } = require("zod");
+const {
+  EmailAlreadyInUseError,
+  InvalidUserDataError,
+} = require("../errors/errors");
+const User = require("../entities/user");
 
-const DEFAULT_ROLE_NAME = 'user';
+const DEFAULT_ROLE_NAME = "user";
 
 const registerInputSchema = z.object({
-  firstName: z.string().trim().min(1, 'First name is required').max(100),
-  lastName: z.string().trim().min(1, 'Last name is required').max(100),
-  email: z.string().trim().email('Invalid email format').toLowerCase(),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  firstName: z.string().trim().min(1, "First name is required").max(100),
+  lastName: z.string().trim().min(1, "Last name is required").max(100),
+  email: z.string().trim().email("Invalid email format").toLowerCase(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 class RegisterUser {
@@ -19,11 +22,10 @@ class RegisterUser {
   }
 
   async execute(input) {
-
     const validationResult = registerInputSchema.safeParse(input);
     if (!validationResult.success) {
       const details = validationResult.error.errors.map((err) => ({
-        field: err.path.join('.'),
+        field: err.path.join("."),
         message: err.message,
       }));
       throw new InvalidUserDataError(details);
@@ -38,9 +40,6 @@ class RegisterUser {
 
     const passwordHash = await this.passwordHasher.hash(password);
 
-    // ห้าม hardcode roleId เป็นเลขตรงๆ (เช่น roleId: 2) เพราะลำดับ id ของ role
-    // ขึ้นอยู่กับลำดับที่ seed ไว้ตอน migrate ซึ่งอาจไม่เหมือนกันทุก environment
-    // ต้อง lookup จากชื่อเสมอ ถ้าไม่เจอแปลว่า seed migration ยังไม่ได้รัน
     const defaultRole = await this.roleRepository.findByName(DEFAULT_ROLE_NAME);
     if (!defaultRole) {
       throw new Error(

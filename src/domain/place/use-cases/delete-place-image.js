@@ -33,8 +33,6 @@ class DeletePlaceImage {
     }
 
     const image = await this.imageRepository.findById(parsedImageId.data);
-    // สำคัญ: เช็คว่ารูปนี้เป็นของ place นี้จริง ไม่ใช่แค่ id มีอยู่ในระบบ
-    // ป้องกันคนส่ง imageId ของ place อื่นเข้ามาทาง route /places/:id/images/:imageId
     if (!image || image.placeId !== parsedPlaceId.data) {
       throw new PlaceImageNotFoundError();
     }

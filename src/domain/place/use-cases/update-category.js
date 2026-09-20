@@ -50,7 +50,6 @@ class UpdateCategory {
       const nameOwner = await this.categoryRepository.findByName(
         validationResult.data.name,
       );
-      // ชื่อซ้ำได้ถ้าเป็น category ตัวเองอยู่แล้ว (ไม่ได้เปลี่ยนชื่อจริง) แต่ห้ามซ้ำกับตัวอื่น
       if (nameOwner && nameOwner.id !== parsedId.data) {
         throw new CategoryAlreadyExistsError();
       }

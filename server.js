@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors"); // 1. import cors เข้ามา
+const cors = require("cors");
 const container = require("./src/container/container");
 const createRouter = require("./src/interfaces/http/routes");
 const errorHandler = require("./src/interfaces/http/middlewares/error-handler");

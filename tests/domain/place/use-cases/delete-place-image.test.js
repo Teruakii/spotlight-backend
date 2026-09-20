@@ -19,15 +19,14 @@ describe("DeletePlaceImage", () => {
   });
 
   test("SECURITY: ห้ามลบรูปของ place อื่นผ่าน URL /places/:id/images/:imageId ที่ id/imageId ไม่ match กัน", async () => {
-    // สถานการณ์จำลอง IDOR: OWNER เป็นเจ้าของทั้ง place A และ B
-    // แต่ image 200 เป็นของ place B — พยายามลบผ่าน URL ของ place A (/places/10/images/200)
+   
     const placeRepo = new FakePlaceRepository([PLACE_A, PLACE_B]);
     const imageRepo = new FakeImageRepository([{ id: 200, placeId: 20, imageUrl: "y" }]);
     const useCase = new DeletePlaceImage(placeRepo, imageRepo);
 
     await expect(useCase.execute(OWNER, 10, 200)).rejects.toThrow(/not found/i);
 
-    // รูปต้องยังอยู่ครบ ไม่ถูกลบไปทั้งที่ path ไม่ตรง
+  
     expect(await imageRepo.findById(200)).not.toBeNull();
   });
 

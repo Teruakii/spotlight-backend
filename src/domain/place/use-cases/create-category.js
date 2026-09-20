@@ -15,8 +15,6 @@ class CreateCategory {
   }
 
   async execute(requester, input) {
-    // requirePermission('category:manage') middleware กันไว้ที่ route แล้ว แต่เช็คซ้ำที่ use case
-    // เพราะ use case ต้องปลอดภัยได้ด้วยตัวเอง ไม่พึ่งแค่ middleware ชั้นเดียว
     if (!requester || !requester.hasPermission("category:manage")) {
       throw new ForbiddenPlaceActionError();
     }

@@ -39,8 +39,7 @@ ALTER TABLE `role_permissions` ADD CONSTRAINT `role_permissions_role_id_fkey` FO
 -- AddForeignKey
 ALTER TABLE `role_permissions` ADD CONSTRAINT `role_permissions_permission_id_fkey` FOREIGN KEY (`permission_id`) REFERENCES `permissions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- Seed roles: ชื่อต้องตรงกับค่า enum เดิม ('admin', 'user') เป๊ะๆ เพราะขั้นตอน backfill
--- ด้านล่างจะ join ด้วยชื่อนี้เพื่อย้ายข้อมูลของ user ที่มีอยู่แล้วเข้า role_id
+
 INSERT INTO `roles` (`name`, `description`, `updated_at`) VALUES
   ('admin', 'Full administrative access', CURRENT_TIMESTAMP(3)),
   ('user', 'Standard authenticated user', CURRENT_TIMESTAMP(3));

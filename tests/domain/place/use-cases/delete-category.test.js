@@ -15,7 +15,7 @@ describe("DeleteCategory", () => {
 
   test("ห้ามลบ category ที่ยังมี place ใช้อยู่ — ต้อง throw ก่อนแตะ DB จริง", async () => {
     const repo = new FakeCategoryRepository([{ id: 1, name: "Dining" }]);
-    repo.__setPlacesUsingCategory(() => 3); // มี 3 place ใช้ category นี้อยู่
+    repo.__setPlacesUsingCategory(() => 3); 
     const useCase = new DeleteCategory(repo);
 
     await expect(useCase.execute(makeAdmin(), 1)).rejects.toThrow(/still use it/i);

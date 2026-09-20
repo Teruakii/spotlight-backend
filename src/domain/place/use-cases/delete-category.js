@@ -27,10 +27,6 @@ class DeleteCategory {
     if (!existing) {
       throw new CategoryNotFoundError();
     }
-
-    // เช็คก่อนลบว่ามี place ใช้ category นี้อยู่ไหม — ถ้าไม่เช็คตรงนี้ Prisma จะ throw
-    // raw foreign key constraint error (P2003) ที่ error-handler มองว่า "unexpected error" (500)
-    // เพราะ err.isOperational ไม่ true จึงต้องดักเป็น business error ที่นี่ก่อน
     const placesCount = await this.categoryRepository.countPlacesUsingCategory(
       parsedId.data,
     );

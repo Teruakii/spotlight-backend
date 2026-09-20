@@ -11,7 +11,6 @@ const PLACES = [
 ];
 
 function makeModeratorOnly() {
-  // มีแค่ place:moderate ไม่มี place:manage_any — จำลอง role แยกในอนาคตที่ไม่ใช่ admin เต็มรูป
   return new User({ id: 10, role: "moderator", permissions: ["place:moderate"] });
 }
 
@@ -31,14 +30,10 @@ describe("ListPlaces", () => {
 
     const result = await useCase.execute({ status: "pending" }, OWNER);
 
-    // ต้อง "ไม่ยอมให้" status filter มีผล เพราะ OWNER ไม่มี permission ดู list แบบ admin
     expect(result.map((p) => p.id)).toEqual([1]);
   });
 
   test("SECURITY FIX: role ที่มีแค่ place:moderate (ไม่มี place:manage_any) ต้องยังกรอง status ได้ปกติ", async () => {
-    // นี่คือ regression test ของบั๊กที่เจอระหว่างทาง: ถ้า role ในอนาคตแยก
-    // place:moderate ออกจาก place:manage_any (เช่น role "moderator" ที่ดูแลคิว
-    // pending อย่างเดียว ไม่ได้แก้ไข/ลบ place ของคนอื่น) ต้องยังกรอง status ได้
     const repo = new FakePlaceRepository(PLACES);
     const useCase = new ListPlaces(repo);
 
