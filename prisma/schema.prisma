@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum PlaceStatus {
+  pending
+  approved
+  rejected
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  firstName         String    @map("first_name")
+  lastName          String    @map("last_name")
+  email             String    @unique
+  passwordHash      String    @map("password_hash")
+
+  roleId            Int       @map("role_id")
+  role              Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  isSuspended       Boolean   @default(false) @map("is_suspended")
+  lastLoginAt       DateTime? @map("last_login_at")
+  passwordChangedAt DateTime  @default(now()) @map("password_changed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  places  Place[]
+  reviews Review[]
+
+  @@index([roleId])
+  @@map("users")
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  places Place[]
+
+  @@map("categories")
+}
+
+model Place {
+  id           Int         @id @default(autoincrement())
+  createdBy    Int         @map("created_by")
+  categoryId   Int         @map("category_id")
+  name         String
+  description  String?     @db.Text
+  address      String?
+  latitude     Decimal?    @db.Decimal(10, 8)
+  longitude    Decimal?    @db.Decimal(11, 8)
+  openingHours String?     @map("opening_hours")
+  priceInfo    String?     @map("price_info")
+  priceLevel   Int?        @map("price_level")
+  bestTime     String?     @map("best_time")
+  duration     String?
+  status       PlaceStatus @default(pending)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  creator    User             @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  category   Category         @relation(fields: [categoryId], references: [id])
+  images     PlaceImage[]
+  transports PlaceTransport[]
+  reviews    Review[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdBy])
+  @@map("places")
+}
+
+model PlaceImage {
+  id       Int    @id @default(autoincrement())
+  placeId  Int    @map("place_id")
+  imageUrl String @map("image_url")
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@index([placeId])
+  @@map("place_images")
+}
+
+model PlaceTransport {
+  id      Int    @id @default(autoincrement())
+  placeId Int    @map("place_id")
+  method  String
+  detail  String
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@index([placeId])
+  @@map("place_transports")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  placeId   Int      @map("place_id")
+  userId    Int      @map("user_id")
+  rating    Int      @db.TinyInt
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([placeId])
+  @@index([userId])
+  @@map("reviews")
+}
