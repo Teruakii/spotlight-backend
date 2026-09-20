@@ -51,12 +51,24 @@ if (!process.env.DATABASE_URL) {
 }
 const dbUrl = new URL(process.env.DATABASE_URL);
 
+function buildSslOptions(url) {
+  if (process.env.DATABASE_CA_CERT) {
+    return { ca: process.env.DATABASE_CA_CERT.replace(/\\n/g, "\n") };
+  }
+  const mode = (url.searchParams.get("ssl-mode") || "").toUpperCase();
+  if (process.env.DATABASE_SSL === "true" || mode === "REQUIRED") {
+    return { rejectUnauthorized: false };
+  }
+  return undefined;
+}
+
 const adapter = new PrismaMariaDb({
   host: dbUrl.hostname,
   port: dbUrl.port ? Number(dbUrl.port) : 3306,
   user: decodeURIComponent(dbUrl.username),
   password: decodeURIComponent(dbUrl.password),
   database: dbUrl.pathname.replace(/^\//, ""),
+  ssl: buildSslOptions(dbUrl),
 });
 
 const prisma = new PrismaClient({ adapter });
@@ -135,3 +147,5 @@ module.exports = {
   updateReview,
   deleteReview,
 };
+
+
