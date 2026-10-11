@@ -13,14 +13,14 @@ enum PlaceStatus {
 }
 
 model User {
-  id                Int       @id @default(autoincrement())
-  firstName         String    @map("first_name")
-  lastName          String    @map("last_name")
-  email             String    @unique
-  passwordHash      String    @map("password_hash")
+  id           Int    @id @default(autoincrement())
+  firstName    String @map("first_name")
+  lastName     String @map("last_name")
+  email        String @unique
+  passwordHash String @map("password_hash")
 
-  roleId            Int       @map("role_id")
-  role              Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  roleId Int  @map("role_id")
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
   isSuspended       Boolean   @default(false) @map("is_suspended")
   lastLoginAt       DateTime? @map("last_login_at")
@@ -28,19 +28,20 @@ model User {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  places  Place[]
-  reviews Review[]
+  places      Place[]
+  reviews     Review[]
+  savedPlaces SavedPlace[]
 
   @@index([roleId])
   @@map("users")
 }
 
 model Role {
-  id          Int              @id @default(autoincrement())
-  name        String           @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
   description String?
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   users       User[]
   permissions RolePermission[]
@@ -49,23 +50,23 @@ model Role {
 }
 
 model Permission {
-  id          Int              @id @default(autoincrement())
-  name        String           @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
   description String?
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  roles       RolePermission[]
+  roles RolePermission[]
 
   @@map("permissions")
 }
 
 model RolePermission {
-  roleId       Int        @map("role_id")
-  permissionId Int        @map("permission_id")
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
 
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
   @@index([permissionId])
@@ -103,6 +104,7 @@ model Place {
   images     PlaceImage[]
   transports PlaceTransport[]
   reviews    Review[]
+  savedBy    SavedPlace[]
 
   @@index([categoryId])
   @@index([status])
@@ -147,4 +149,17 @@ model Review {
   @@index([placeId])
   @@index([userId])
   @@map("reviews")
+}
+
+model SavedPlace {
+  userId    Int      @map("user_id")
+  placeId   Int      @map("place_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, placeId])
+  @@index([placeId])
+  @@map("saved_places")
 }

@@ -9,6 +9,7 @@ const PrismaCategoryRepository = require("../infra/persistence/prisma-category-r
 const PrismaPlaceImageRepository = require("../infra/persistence/prisma-place-image-repository");
 const PrismaPlaceTransportRepository = require("../infra/persistence/prisma-place-transport-repository");
 const PrismaRoleRepository = require("../infra/persistence/prisma-role-repository");
+const PrismaSavedPlaceRepository = require("../infra/persistence/prisma-saved-place-repository");
 const BcryptPasswordHasher = require("../infra/security/bcrypt-password-hasher");
 const JwtTokenService = require("../infra/security/jwt-token-service");
 
@@ -41,6 +42,11 @@ const CreateReview = require("../domain/review/use-cases/create-review");
 const ListReviewsForPlace = require("../domain/review/use-cases/list-reviews-for-place");
 const UpdateReview = require("../domain/review/use-cases/update-review");
 const DeleteReview = require("../domain/review/use-cases/delete-review");
+
+// --- Saved place use cases ---
+const SavePlace = require("../domain/saved-place/use-cases/save-place");
+const UnsavePlace = require("../domain/saved-place/use-cases/unsave-place");
+const ListSavedPlaces = require("../domain/saved-place/use-cases/list-saved-places");
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET env var is required");
@@ -81,6 +87,7 @@ const categoryRepository = new PrismaCategoryRepository(prisma);
 const imageRepository = new PrismaPlaceImageRepository(prisma);
 const transportRepository = new PrismaPlaceTransportRepository(prisma);
 const roleRepository = new PrismaRoleRepository(prisma);
+const savedPlaceRepository = new PrismaSavedPlaceRepository(prisma);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService(
   process.env.JWT_SECRET,
@@ -117,6 +124,11 @@ const listReviewsForPlace = new ListReviewsForPlace(reviewRepository);
 const updateReview = new UpdateReview(reviewRepository);
 const deleteReview = new DeleteReview(reviewRepository);
 
+// --- Saved place use cases ---
+const savePlace = new SavePlace(savedPlaceRepository, getPlaceById);
+const unsavePlace = new UnsavePlace(savedPlaceRepository);
+const listSavedPlaces = new ListSavedPlaces(savedPlaceRepository);
+
 module.exports = {
   prisma,
   tokenService,
@@ -146,6 +158,10 @@ module.exports = {
   listReviewsForPlace,
   updateReview,
   deleteReview,
+
+  savePlace,
+  unsavePlace,
+  listSavedPlaces,
 };
 
 
