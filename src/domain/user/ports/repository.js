@@ -15,6 +15,12 @@ class UserRepository {
     throw new Error('UserRepository.update() must be implemented');
   }
 
+  // [{ ...user, role, counts: { places, reviews } }] filtered by name/email
+  // search, suspension, or explicit ids; newest first.
+  async findAllForAdmin({ search, suspended, ids }) {
+    throw new Error('UserRepository.findAllForAdmin() must be implemented');
+  }
+
   async countActivity(id) {
     throw new Error('UserRepository.countActivity() must be implemented');
   }

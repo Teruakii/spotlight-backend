@@ -25,6 +25,7 @@ const GetProfile = require("../domain/user/use-cases/get-profile");
 const UpdateProfile = require("../domain/user/use-cases/update-profile");
 const ChangePassword = require("../domain/user/use-cases/change-password");
 const DeleteAccount = require("../domain/user/use-cases/delete-account");
+const { ListUsers, SetUserSuspension } = require("../domain/user/use-cases/admin-users");
 
 // --- Place use cases ---
 const CreatePlace = require("../domain/place/use-cases/create-place");
@@ -138,6 +139,8 @@ const getProfile = new GetProfile(userRepository);
 const updateProfile = new UpdateProfile(userRepository);
 const changePassword = new ChangePassword(userRepository, passwordHasher);
 const deleteAccount = new DeleteAccount(userRepository, passwordHasher);
+const listUsers = new ListUsers(userRepository);
+const setUserSuspension = new SetUserSuspension(userRepository);
 
 // --- Place use cases ---
 const createPlace = new CreatePlace(placeRepository, categoryRepository);
@@ -203,6 +206,8 @@ module.exports = {
   updateProfile,
   changePassword,
   deleteAccount,
+  listUsers,
+  setUserSuspension,
 
   createPlace,
   getPlaceById,
