@@ -15,7 +15,7 @@ class DeleteAccount {
     this.passwordHasher = passwordHasher;
   }
 
-  // Reviews and saved places cascade with the user. Places do not (FK is
+  // Reviews, saved places and collections cascade with the user. Places do not (FK is
   // Restrict), so an account that still owns places cannot be deleted.
   async execute(user, input) {
     const validationResult = deleteAccountSchema.safeParse(input);

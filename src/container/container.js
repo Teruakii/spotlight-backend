@@ -10,6 +10,7 @@ const PrismaPlaceImageRepository = require("../infra/persistence/prisma-place-im
 const PrismaPlaceTransportRepository = require("../infra/persistence/prisma-place-transport-repository");
 const PrismaRoleRepository = require("../infra/persistence/prisma-role-repository");
 const PrismaSavedPlaceRepository = require("../infra/persistence/prisma-saved-place-repository");
+const PrismaCollectionRepository = require("../infra/persistence/prisma-collection-repository");
 const BcryptPasswordHasher = require("../infra/security/bcrypt-password-hasher");
 const JwtTokenService = require("../infra/security/jwt-token-service");
 
@@ -36,6 +37,16 @@ const DeletePlaceImage = require("../domain/place/use-cases/delete-place-image")
 const AddPlaceTransport = require("../domain/place/use-cases/add-place-transport");
 const ListNearbyPlaces = require("../domain/place/use-cases/list-nearby-places");
 const RecommendPlaces = require("../domain/place/use-cases/recommend-places");
+const {
+  ListMyCollections,
+  CreateCollection,
+  GetCollection,
+  UpdateCollection,
+  DeleteCollection,
+  AddCollectionItem,
+  RemoveCollectionItem,
+  SetCollectionLayout,
+} = require("../domain/collection/use-cases/collection-use-cases");
 
 // --- Category use cases ---
 const ListCategories = require("../domain/place/use-cases/list-categories");
@@ -98,6 +109,7 @@ const imageRepository = new PrismaPlaceImageRepository(prisma);
 const transportRepository = new PrismaPlaceTransportRepository(prisma);
 const roleRepository = new PrismaRoleRepository(prisma);
 const savedPlaceRepository = new PrismaSavedPlaceRepository(prisma);
+const collectionRepository = new PrismaCollectionRepository(prisma);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService(
   process.env.JWT_SECRET,
@@ -149,6 +161,16 @@ const listSavedPlaces = new ListSavedPlaces(savedPlaceRepository);
 const listNearbyPlaces = new ListNearbyPlaces(placeRepository, getPlaceById);
 const recommendPlaces = new RecommendPlaces(placeRepository, savedPlaceRepository);
 
+// --- Collection use cases ---
+const listMyCollections = new ListMyCollections(collectionRepository);
+const createCollection = new CreateCollection(collectionRepository);
+const getCollection = new GetCollection(collectionRepository);
+const updateCollection = new UpdateCollection(collectionRepository);
+const deleteCollection = new DeleteCollection(collectionRepository);
+const addCollectionItem = new AddCollectionItem(collectionRepository, getPlaceById);
+const removeCollectionItem = new RemoveCollectionItem(collectionRepository);
+const setCollectionLayout = new SetCollectionLayout(collectionRepository);
+
 module.exports = {
   prisma,
   tokenService,
@@ -192,6 +214,14 @@ module.exports = {
   listSavedPlaces,
   listNearbyPlaces,
   recommendPlaces,
+  listMyCollections,
+  createCollection,
+  getCollection,
+  updateCollection,
+  deleteCollection,
+  addCollectionItem,
+  removeCollectionItem,
+  setCollectionLayout,
 };
 
 

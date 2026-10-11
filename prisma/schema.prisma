@@ -37,6 +37,7 @@ model User {
   reviews      Review[]
   savedPlaces  SavedPlace[]
   helpfulVotes ReviewHelpfulVote[]
+  collections  Collection[]
 
   @@index([roleId])
   @@map("users")
@@ -105,12 +106,13 @@ model Place {
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
 
-  creator    User             @relation(fields: [createdBy], references: [id], onDelete: Restrict)
-  category   Category         @relation(fields: [categoryId], references: [id])
-  images     PlaceImage[]
-  transports PlaceTransport[]
-  reviews    Review[]
-  savedBy    SavedPlace[]
+  creator         User             @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  category        Category         @relation(fields: [categoryId], references: [id])
+  images          PlaceImage[]
+  transports      PlaceTransport[]
+  reviews         Review[]
+  savedBy         SavedPlace[]
+  collectionItems CollectionItem[]
 
   @@index([categoryId])
   @@index([status])
@@ -199,4 +201,38 @@ model ReviewHelpfulVote {
   @@id([reviewId, userId])
   @@index([userId])
   @@map("review_helpful_votes")
+}
+
+model Collection {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  isPrivate   Boolean  @default(true) @map("is_private")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CollectionItem[]
+
+  @@index([userId])
+  @@map("collections")
+}
+
+model CollectionItem {
+  id           Int      @id @default(autoincrement())
+  collectionId Int      @map("collection_id")
+  placeId      Int      @map("place_id")
+  day          Int      @default(1)
+  position     Int
+  startTime    String?  @map("start_time") @db.Char(5)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  place      Place      @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, placeId])
+  @@index([collectionId, day, position])
+  @@index([placeId])
+  @@map("collection_items")
 }
