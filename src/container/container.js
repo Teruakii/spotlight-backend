@@ -34,6 +34,8 @@ const RejectPlace = require("../domain/place/use-cases/reject-place");
 const AddPlaceImage = require("../domain/place/use-cases/add-place-image");
 const DeletePlaceImage = require("../domain/place/use-cases/delete-place-image");
 const AddPlaceTransport = require("../domain/place/use-cases/add-place-transport");
+const ListNearbyPlaces = require("../domain/place/use-cases/list-nearby-places");
+const RecommendPlaces = require("../domain/place/use-cases/recommend-places");
 
 // --- Category use cases ---
 const ListCategories = require("../domain/place/use-cases/list-categories");
@@ -144,6 +146,8 @@ const setReviewHelpful = new SetReviewHelpful(reviewRepository);
 const savePlace = new SavePlace(savedPlaceRepository, getPlaceById);
 const unsavePlace = new UnsavePlace(savedPlaceRepository);
 const listSavedPlaces = new ListSavedPlaces(savedPlaceRepository);
+const listNearbyPlaces = new ListNearbyPlaces(placeRepository, getPlaceById);
+const recommendPlaces = new RecommendPlaces(placeRepository, savedPlaceRepository);
 
 module.exports = {
   prisma,
@@ -186,6 +190,8 @@ module.exports = {
   savePlace,
   unsavePlace,
   listSavedPlaces,
+  listNearbyPlaces,
+  recommendPlaces,
 };
 
 
