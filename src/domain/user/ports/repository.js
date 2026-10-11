@@ -15,6 +15,14 @@ class UserRepository {
     throw new Error('UserRepository.update() must be implemented');
   }
 
+  async countActivity(id) {
+    throw new Error('UserRepository.countActivity() must be implemented');
+  }
+
+  async delete(id) {
+    throw new Error('UserRepository.delete() must be implemented');
+  }
+
   async recordLogin(id) {
     throw new Error('UserRepository.recordLogin() must be implemented');
   }

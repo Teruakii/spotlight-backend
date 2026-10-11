@@ -19,6 +19,16 @@ class PrismaReviewRepository extends ReviewRepository {
     });
   }
 
+  async findByUserId(userId) {
+    return this.prisma.review.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        place: { select: { id: true, name: true, images: { select: { imageUrl: true }, take: 1 } } },
+      },
+    });
+  }
+
   async create(data) {
     return this.prisma.review.create({ data });
   }

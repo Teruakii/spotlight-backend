@@ -7,6 +7,10 @@ class ReviewRepository {
     throw new Error('ReviewRepository.findByPlaceId() must be implemented');
   }
 
+  async findByUserId(userId) {
+    throw new Error('ReviewRepository.findByUserId() must be implemented');
+  }
+
   async create(data) {
     throw new Error('ReviewRepository.create() must be implemented');
   }
