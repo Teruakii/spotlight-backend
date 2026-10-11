@@ -11,6 +11,7 @@ const PrismaPlaceTransportRepository = require("../infra/persistence/prisma-plac
 const PrismaRoleRepository = require("../infra/persistence/prisma-role-repository");
 const PrismaSavedPlaceRepository = require("../infra/persistence/prisma-saved-place-repository");
 const PrismaCollectionRepository = require("../infra/persistence/prisma-collection-repository");
+const PrismaStatsRepository = require("../infra/persistence/prisma-stats-repository");
 const BcryptPasswordHasher = require("../infra/security/bcrypt-password-hasher");
 const JwtTokenService = require("../infra/security/jwt-token-service");
 
@@ -47,6 +48,10 @@ const {
   RemoveCollectionItem,
   SetCollectionLayout,
 } = require("../domain/collection/use-cases/collection-use-cases");
+
+// --- Admin use cases ---
+const GetAdminStats = require("../domain/admin/use-cases/get-admin-stats");
+const RecordPlaceView = require("../domain/admin/use-cases/record-place-view");
 
 // --- Category use cases ---
 const ListCategories = require("../domain/place/use-cases/list-categories");
@@ -110,6 +115,7 @@ const transportRepository = new PrismaPlaceTransportRepository(prisma);
 const roleRepository = new PrismaRoleRepository(prisma);
 const savedPlaceRepository = new PrismaSavedPlaceRepository(prisma);
 const collectionRepository = new PrismaCollectionRepository(prisma);
+const statsRepository = new PrismaStatsRepository(prisma);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService(
   process.env.JWT_SECRET,
@@ -171,6 +177,10 @@ const addCollectionItem = new AddCollectionItem(collectionRepository, getPlaceBy
 const removeCollectionItem = new RemoveCollectionItem(collectionRepository);
 const setCollectionLayout = new SetCollectionLayout(collectionRepository);
 
+// --- Admin use cases ---
+const getAdminStats = new GetAdminStats(statsRepository);
+const recordPlaceView = new RecordPlaceView(statsRepository, getPlaceById);
+
 module.exports = {
   prisma,
   tokenService,
@@ -222,6 +232,8 @@ module.exports = {
   addCollectionItem,
   removeCollectionItem,
   setCollectionLayout,
+  getAdminStats,
+  recordPlaceView,
 };
 
 

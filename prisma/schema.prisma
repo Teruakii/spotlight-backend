@@ -38,6 +38,7 @@ model User {
   savedPlaces  SavedPlace[]
   helpfulVotes ReviewHelpfulVote[]
   collections  Collection[]
+  placeViews   PlaceView[]
 
   @@index([roleId])
   @@map("users")
@@ -113,6 +114,7 @@ model Place {
   reviews         Review[]
   savedBy         SavedPlace[]
   collectionItems CollectionItem[]
+  views           PlaceView[]
 
   @@index([categoryId])
   @@index([status])
@@ -235,4 +237,19 @@ model CollectionItem {
   @@index([collectionId, day, position])
   @@index([placeId])
   @@map("collection_items")
+}
+
+model PlaceView {
+  id        Int      @id @default(autoincrement())
+  placeId   Int      @map("place_id")
+  userId    Int?     @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([placeId])
+  @@index([userId])
+  @@map("place_views")
 }
