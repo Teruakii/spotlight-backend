@@ -24,6 +24,21 @@ class FakeUserRepository {
     return row;
   }
 
+  async update({ id, ...data }) {
+    const row = this.rows.find((u) => u.id === id);
+    Object.assign(row, data);
+    return row;
+  }
+
+  async countActivity(id) {
+    const row = this.rows.find((u) => u.id === id);
+    return row?.activity ?? { reviews: 0, savedPlaces: 0, places: 0 };
+  }
+
+  async delete(id) {
+    this.rows = this.rows.filter((u) => u.id !== id);
+  }
+
   isDuplicateEmailError(err) {
     return err.code === "P2002";
   }

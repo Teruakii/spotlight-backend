@@ -18,6 +18,10 @@ const RegisterUser = require("../domain/user/use-cases/register-user");
 const GetUserById = require("../domain/user/use-cases/get-user-by-id");
 const CheckEmailAvailability = require("../domain/user/use-cases/check-email-availability");
 const Login = require("../domain/auth/use-cases/login");
+const GetProfile = require("../domain/user/use-cases/get-profile");
+const UpdateProfile = require("../domain/user/use-cases/update-profile");
+const ChangePassword = require("../domain/user/use-cases/change-password");
+const DeleteAccount = require("../domain/user/use-cases/delete-account");
 
 // --- Place use cases ---
 const CreatePlace = require("../domain/place/use-cases/create-place");
@@ -42,6 +46,7 @@ const CreateReview = require("../domain/review/use-cases/create-review");
 const ListReviewsForPlace = require("../domain/review/use-cases/list-reviews-for-place");
 const UpdateReview = require("../domain/review/use-cases/update-review");
 const DeleteReview = require("../domain/review/use-cases/delete-review");
+const ListReviewsByUser = require("../domain/review/use-cases/list-reviews-by-user");
 
 // --- Saved place use cases ---
 const SavePlace = require("../domain/saved-place/use-cases/save-place");
@@ -99,6 +104,10 @@ const registerUser = new RegisterUser(userRepository, passwordHasher, roleReposi
 const getUserById = new GetUserById(userRepository);
 const checkEmailAvailability = new CheckEmailAvailability(userRepository);
 const login = new Login(userRepository, passwordHasher, tokenService);
+const getProfile = new GetProfile(userRepository);
+const updateProfile = new UpdateProfile(userRepository);
+const changePassword = new ChangePassword(userRepository, passwordHasher);
+const deleteAccount = new DeleteAccount(userRepository, passwordHasher);
 
 // --- Place use cases ---
 const createPlace = new CreatePlace(placeRepository, categoryRepository);
@@ -123,6 +132,7 @@ const createReview = new CreateReview(reviewRepository, placeRepository);
 const listReviewsForPlace = new ListReviewsForPlace(reviewRepository);
 const updateReview = new UpdateReview(reviewRepository);
 const deleteReview = new DeleteReview(reviewRepository);
+const listReviewsByUser = new ListReviewsByUser(reviewRepository);
 
 // --- Saved place use cases ---
 const savePlace = new SavePlace(savedPlaceRepository, getPlaceById);
@@ -137,6 +147,10 @@ module.exports = {
   getUserById,
   checkEmailAvailability,
   login,
+  getProfile,
+  updateProfile,
+  changePassword,
+  deleteAccount,
 
   createPlace,
   getPlaceById,
@@ -158,6 +172,7 @@ module.exports = {
   listReviewsForPlace,
   updateReview,
   deleteReview,
+  listReviewsByUser,
 
   savePlace,
   unsavePlace,

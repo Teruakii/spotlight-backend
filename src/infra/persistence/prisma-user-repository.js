@@ -48,6 +48,18 @@ class PrismaUserRepository extends UserRepository {
     return this._flatten(record);
   }
 
+  async countActivity(id) {
+    const record = await this.prisma.user.findUnique({
+      where: { id },
+      select: { _count: { select: { reviews: true, savedPlaces: true, places: true } } },
+    });
+    return record ? record._count : { reviews: 0, savedPlaces: 0, places: 0 };
+  }
+
+  async delete(id) {
+    await this.prisma.user.delete({ where: { id } });
+  }
+
   async recordLogin(id) {
     return this.prisma.user.update({
       where: { id },
