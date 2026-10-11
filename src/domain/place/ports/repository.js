@@ -7,6 +7,10 @@ class PlaceRepository {
     throw new Error('PlaceRepository.findAll() must be implemented');
   }
 
+  async findApprovedWithin({ minLat, maxLat, minLng, maxLng, categoryId }) {
+    throw new Error('PlaceRepository.findApprovedWithin() must be implemented');
+  }
+
   async create(data) {
     throw new Error('PlaceRepository.create() must be implemented');
   }

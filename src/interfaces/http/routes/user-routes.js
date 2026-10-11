@@ -7,6 +7,7 @@ const makeUpdateMyProfileController = require('../controllers/update-my-profile-
 const makeListMyReviewsController = require('../controllers/list-my-reviews-controller');
 const makeChangePasswordController = require('../controllers/change-password-controller');
 const makeDeleteAccountController = require('../controllers/delete-account-controller');
+const makeListRecommendationsController = require('../controllers/list-recommendations-controller');
 
 module.exports = function userRoutes(deps) {
   const router = express.Router();
@@ -18,6 +19,7 @@ module.exports = function userRoutes(deps) {
   router.get('/me/profile', auth, makeGetMyProfileController(deps));
   router.patch('/me/profile', auth, makeUpdateMyProfileController(deps));
   router.get('/me/reviews', auth, makeListMyReviewsController(deps));
+  router.get('/me/recommendations', auth, makeListRecommendationsController(deps));
   router.post('/me/password', auth, makeChangePasswordController(deps));
 
   return router;
