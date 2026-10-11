@@ -25,6 +25,18 @@ class PrismaPlaceRepository extends PlaceRepository {
     });
   }
 
+  async findApprovedWithin({ minLat, maxLat, minLng, maxLng, categoryId }) {
+    return this.prisma.place.findMany({
+      where: {
+        status: 'approved',
+        latitude: { gte: minLat, lte: maxLat },
+        longitude: { gte: minLng, lte: maxLng },
+        ...(categoryId ? { categoryId } : {}),
+      },
+      include: PLACE_INCLUDE,
+    });
+  }
+
   async create(data) {
     return this.prisma.place.create({ data });
   }

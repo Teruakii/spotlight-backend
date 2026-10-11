@@ -5,6 +5,7 @@ const ADMIN_PERMISSIONS = [
   "place:manage_any",
   "place:moderate",
   "review:manage_any",
+  "user:manage",
 ];
 
 function makeAdmin(overrides = {}) {

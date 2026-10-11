@@ -24,6 +24,30 @@ class FakeUserRepository {
     return row;
   }
 
+  async update({ id, ...data }) {
+    const row = this.rows.find((u) => u.id === id);
+    Object.assign(row, data);
+    return row;
+  }
+
+  async findAllForAdmin({ search, suspended, ids } = {}) {
+    const q = (search || "").toLowerCase();
+    return this.rows
+      .filter((u) => !ids || ids.includes(u.id))
+      .filter((u) => suspended === undefined || Boolean(u.isSuspended) === suspended)
+      .filter((u) => !q || [u.firstName, u.lastName, u.email].some((v) => (v || "").toLowerCase().includes(q)))
+      .map((u) => ({ ...u, counts: u.activity ? { places: u.activity.places, reviews: u.activity.reviews } : { places: 0, reviews: 0 } }));
+  }
+
+  async countActivity(id) {
+    const row = this.rows.find((u) => u.id === id);
+    return row?.activity ?? { reviews: 0, savedPlaces: 0, places: 0 };
+  }
+
+  async delete(id) {
+    this.rows = this.rows.filter((u) => u.id !== id);
+  }
+
   isDuplicateEmailError(err) {
     return err.code === "P2002";
   }

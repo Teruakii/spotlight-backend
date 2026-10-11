@@ -22,8 +22,26 @@ class InvalidUserDataError extends AppError {
   }
 }
 
+class IncorrectPasswordError extends AppError {
+  constructor() {
+    super('Password is incorrect', 400);
+  }
+}
+
+class AccountHasPlacesError extends AppError {
+  constructor(placesCount) {
+    super(
+      `Cannot delete account: you still own ${placesCount} place(s). Delete them first.`,
+      409,
+    );
+    this.placesCount = placesCount;
+  }
+}
+
 module.exports = {
   UserNotFoundError,
   EmailAlreadyInUseError,
   InvalidUserDataError,
+  IncorrectPasswordError,
+  AccountHasPlacesError,
 };

@@ -9,6 +9,7 @@
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:migration:create": "node scripts/create-migration.js",
     "test": "jest",
     "test:watch": "jest --watch"
   },

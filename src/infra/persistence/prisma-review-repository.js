@@ -19,6 +19,52 @@ class PrismaReviewRepository extends ReviewRepository {
     });
   }
 
+  async findByUserId(userId) {
+    return this.prisma.review.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        place: { select: { id: true, name: true, images: { select: { imageUrl: true }, take: 1 } } },
+      },
+    });
+  }
+
+  _detailedInclude(viewerId) {
+    return {
+      user: { select: { firstName: true, lastName: true } },
+      images: { select: { id: true, imageUrl: true }, orderBy: { id: 'asc' } },
+      _count: { select: { helpfulVotes: true } },
+      helpfulVotes: { where: { userId: viewerId ?? -1 }, select: { userId: true } },
+    };
+  }
+
+  async findDetailedByPlaceId(placeId, viewerId) {
+    return this.prisma.review.findMany({
+      where: { placeId },
+      orderBy: { createdAt: 'desc' },
+      include: this._detailedInclude(viewerId),
+    });
+  }
+
+  async createDetailed(data, imageUrls) {
+    return this.prisma.review.create({
+      data: { ...data, images: { create: imageUrls.map((imageUrl) => ({ imageUrl })) } },
+      include: this._detailedInclude(data.userId),
+    });
+  }
+
+  async addHelpfulVote(reviewId, userId) {
+    await this.prisma.reviewHelpfulVote.upsert({
+      where: { reviewId_userId: { reviewId, userId } },
+      create: { reviewId, userId },
+      update: {},
+    });
+  }
+
+  async removeHelpfulVote(reviewId, userId) {
+    await this.prisma.reviewHelpfulVote.deleteMany({ where: { reviewId, userId } });
+  }
+
   async create(data) {
     return this.prisma.review.create({ data });
   }
