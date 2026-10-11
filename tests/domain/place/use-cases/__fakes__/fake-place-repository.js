@@ -15,8 +15,18 @@ class FakePlaceRepository {
   }
 
   async create(data) {
+    // Mirror the database: nullable columns come back as null, not undefined.
     const row = {
       id: this.nextId++,
+      description: null,
+      address: null,
+      latitude: null,
+      longitude: null,
+      openingHours: null,
+      priceInfo: null,
+      priceLevel: null,
+      bestTime: null,
+      duration: null,
       status: "pending",
       createdAt: new Date(),
       updatedAt: new Date(),
