@@ -6,6 +6,18 @@ datasource db {
   provider = "mysql"
 }
 
+enum ReportReason {
+  spam
+  offensive
+  misleading
+  other
+}
+
+enum ReportStatus {
+  open
+  dismissed
+}
+
 enum PlaceStatus {
   pending
   approved
@@ -33,12 +45,14 @@ model User {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  places       Place[]
-  reviews      Review[]
-  savedPlaces  SavedPlace[]
-  helpfulVotes ReviewHelpfulVote[]
-  collections  Collection[]
-  placeViews   PlaceView[]
+  places          Place[]
+  reviews         Review[]
+  savedPlaces     SavedPlace[]
+  helpfulVotes    ReviewHelpfulVote[]
+  collections     Collection[]
+  placeViews      PlaceView[]
+  reportsFiled    ReviewReport[]      @relation("ReportReporter")
+  reportsResolved ReviewReport[]      @relation("ReportResolver")
 
   @@index([roleId])
   @@map("users")
@@ -162,6 +176,7 @@ model Review {
   user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   images       ReviewImage[]
   helpfulVotes ReviewHelpfulVote[]
+  reports      ReviewReport[]
 
   @@index([placeId])
   @@index([userId])
@@ -252,4 +267,26 @@ model PlaceView {
   @@index([placeId])
   @@index([userId])
   @@map("place_views")
+}
+
+model ReviewReport {
+  id           Int          @id @default(autoincrement())
+  reviewId     Int          @map("review_id")
+  reporterId   Int          @map("reporter_id")
+  reason       ReportReason
+  details      String?      @db.Text
+  status       ReportStatus @default(open)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  resolvedAt   DateTime?    @map("resolved_at")
+  resolvedById Int?         @map("resolved_by_id")
+
+  review     Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reporter   User   @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User?  @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@unique([reviewId, reporterId])
+  @@index([status])
+  @@index([reporterId])
+  @@index([resolvedById])
+  @@map("review_reports")
 }
