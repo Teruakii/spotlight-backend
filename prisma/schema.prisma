@@ -33,9 +33,10 @@ model User {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  places      Place[]
-  reviews     Review[]
-  savedPlaces SavedPlace[]
+  places       Place[]
+  reviews      Review[]
+  savedPlaces  SavedPlace[]
+  helpfulVotes ReviewHelpfulVote[]
 
   @@index([roleId])
   @@map("users")
@@ -148,8 +149,15 @@ model Review {
   comment   String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
 
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experienceRating Int? @map("experience_rating") @db.TinyInt
+  valueRating      Int? @map("value_rating") @db.TinyInt
+  accessRating     Int? @map("access_rating") @db.TinyInt
+  atmosphereRating Int? @map("atmosphere_rating") @db.TinyInt
+
+  place        Place               @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images       ReviewImage[]
+  helpfulVotes ReviewHelpfulVote[]
 
   @@index([placeId])
   @@index([userId])
@@ -167,4 +175,28 @@ model SavedPlace {
   @@id([userId, placeId])
   @@index([placeId])
   @@map("saved_places")
+}
+
+model ReviewImage {
+  id       Int    @id @default(autoincrement())
+  reviewId Int    @map("review_id")
+  imageUrl String @map("image_url") @db.VarChar(500)
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("review_images")
+}
+
+model ReviewHelpfulVote {
+  reviewId  Int      @map("review_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([reviewId, userId])
+  @@index([userId])
+  @@map("review_helpful_votes")
 }
