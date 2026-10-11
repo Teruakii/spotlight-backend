@@ -9,6 +9,10 @@ const PrismaCategoryRepository = require("../infra/persistence/prisma-category-r
 const PrismaPlaceImageRepository = require("../infra/persistence/prisma-place-image-repository");
 const PrismaPlaceTransportRepository = require("../infra/persistence/prisma-place-transport-repository");
 const PrismaRoleRepository = require("../infra/persistence/prisma-role-repository");
+const PrismaSavedPlaceRepository = require("../infra/persistence/prisma-saved-place-repository");
+const PrismaCollectionRepository = require("../infra/persistence/prisma-collection-repository");
+const PrismaStatsRepository = require("../infra/persistence/prisma-stats-repository");
+const PrismaReviewReportRepository = require("../infra/persistence/prisma-review-report-repository");
 const BcryptPasswordHasher = require("../infra/security/bcrypt-password-hasher");
 const JwtTokenService = require("../infra/security/jwt-token-service");
 
@@ -17,6 +21,11 @@ const RegisterUser = require("../domain/user/use-cases/register-user");
 const GetUserById = require("../domain/user/use-cases/get-user-by-id");
 const CheckEmailAvailability = require("../domain/user/use-cases/check-email-availability");
 const Login = require("../domain/auth/use-cases/login");
+const GetProfile = require("../domain/user/use-cases/get-profile");
+const UpdateProfile = require("../domain/user/use-cases/update-profile");
+const ChangePassword = require("../domain/user/use-cases/change-password");
+const DeleteAccount = require("../domain/user/use-cases/delete-account");
+const { ListUsers, SetUserSuspension } = require("../domain/user/use-cases/admin-users");
 
 // --- Place use cases ---
 const CreatePlace = require("../domain/place/use-cases/create-place");
@@ -29,6 +38,22 @@ const RejectPlace = require("../domain/place/use-cases/reject-place");
 const AddPlaceImage = require("../domain/place/use-cases/add-place-image");
 const DeletePlaceImage = require("../domain/place/use-cases/delete-place-image");
 const AddPlaceTransport = require("../domain/place/use-cases/add-place-transport");
+const ListNearbyPlaces = require("../domain/place/use-cases/list-nearby-places");
+const RecommendPlaces = require("../domain/place/use-cases/recommend-places");
+const {
+  ListMyCollections,
+  CreateCollection,
+  GetCollection,
+  UpdateCollection,
+  DeleteCollection,
+  AddCollectionItem,
+  RemoveCollectionItem,
+  SetCollectionLayout,
+} = require("../domain/collection/use-cases/collection-use-cases");
+
+// --- Admin use cases ---
+const GetAdminStats = require("../domain/admin/use-cases/get-admin-stats");
+const RecordPlaceView = require("../domain/admin/use-cases/record-place-view");
 
 // --- Category use cases ---
 const ListCategories = require("../domain/place/use-cases/list-categories");
@@ -41,6 +66,20 @@ const CreateReview = require("../domain/review/use-cases/create-review");
 const ListReviewsForPlace = require("../domain/review/use-cases/list-reviews-for-place");
 const UpdateReview = require("../domain/review/use-cases/update-review");
 const DeleteReview = require("../domain/review/use-cases/delete-review");
+const ListReviewsByUser = require("../domain/review/use-cases/list-reviews-by-user");
+const CreateDetailedReview = require("../domain/review/use-cases/create-detailed-review");
+const ListDetailedReviewsForPlace = require("../domain/review/use-cases/list-detailed-reviews-for-place");
+const SetReviewHelpful = require("../domain/review/use-cases/set-review-helpful");
+const {
+  ReportReview,
+  ListReportedReviews,
+  ModerateReview,
+} = require("../domain/review/use-cases/review-moderation");
+
+// --- Saved place use cases ---
+const SavePlace = require("../domain/saved-place/use-cases/save-place");
+const UnsavePlace = require("../domain/saved-place/use-cases/unsave-place");
+const ListSavedPlaces = require("../domain/saved-place/use-cases/list-saved-places");
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET env var is required");
@@ -81,6 +120,10 @@ const categoryRepository = new PrismaCategoryRepository(prisma);
 const imageRepository = new PrismaPlaceImageRepository(prisma);
 const transportRepository = new PrismaPlaceTransportRepository(prisma);
 const roleRepository = new PrismaRoleRepository(prisma);
+const savedPlaceRepository = new PrismaSavedPlaceRepository(prisma);
+const collectionRepository = new PrismaCollectionRepository(prisma);
+const statsRepository = new PrismaStatsRepository(prisma);
+const reviewReportRepository = new PrismaReviewReportRepository(prisma);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService(
   process.env.JWT_SECRET,
@@ -92,6 +135,12 @@ const registerUser = new RegisterUser(userRepository, passwordHasher, roleReposi
 const getUserById = new GetUserById(userRepository);
 const checkEmailAvailability = new CheckEmailAvailability(userRepository);
 const login = new Login(userRepository, passwordHasher, tokenService);
+const getProfile = new GetProfile(userRepository);
+const updateProfile = new UpdateProfile(userRepository);
+const changePassword = new ChangePassword(userRepository, passwordHasher);
+const deleteAccount = new DeleteAccount(userRepository, passwordHasher);
+const listUsers = new ListUsers(userRepository);
+const setUserSuspension = new SetUserSuspension(userRepository);
 
 // --- Place use cases ---
 const createPlace = new CreatePlace(placeRepository, categoryRepository);
@@ -116,6 +165,34 @@ const createReview = new CreateReview(reviewRepository, placeRepository);
 const listReviewsForPlace = new ListReviewsForPlace(reviewRepository);
 const updateReview = new UpdateReview(reviewRepository);
 const deleteReview = new DeleteReview(reviewRepository);
+const listReviewsByUser = new ListReviewsByUser(reviewRepository);
+const createDetailedReview = new CreateDetailedReview(reviewRepository, placeRepository);
+const listDetailedReviewsForPlace = new ListDetailedReviewsForPlace(reviewRepository);
+const setReviewHelpful = new SetReviewHelpful(reviewRepository);
+const reportReview = new ReportReview(reviewRepository, reviewReportRepository);
+const listReportedReviews = new ListReportedReviews(reviewReportRepository);
+const moderateReview = new ModerateReview(reviewRepository, reviewReportRepository);
+
+// --- Saved place use cases ---
+const savePlace = new SavePlace(savedPlaceRepository, getPlaceById);
+const unsavePlace = new UnsavePlace(savedPlaceRepository);
+const listSavedPlaces = new ListSavedPlaces(savedPlaceRepository);
+const listNearbyPlaces = new ListNearbyPlaces(placeRepository, getPlaceById);
+const recommendPlaces = new RecommendPlaces(placeRepository, savedPlaceRepository);
+
+// --- Collection use cases ---
+const listMyCollections = new ListMyCollections(collectionRepository);
+const createCollection = new CreateCollection(collectionRepository);
+const getCollection = new GetCollection(collectionRepository);
+const updateCollection = new UpdateCollection(collectionRepository);
+const deleteCollection = new DeleteCollection(collectionRepository);
+const addCollectionItem = new AddCollectionItem(collectionRepository, getPlaceById);
+const removeCollectionItem = new RemoveCollectionItem(collectionRepository);
+const setCollectionLayout = new SetCollectionLayout(collectionRepository);
+
+// --- Admin use cases ---
+const getAdminStats = new GetAdminStats(statsRepository);
+const recordPlaceView = new RecordPlaceView(statsRepository, getPlaceById);
 
 module.exports = {
   prisma,
@@ -125,6 +202,12 @@ module.exports = {
   getUserById,
   checkEmailAvailability,
   login,
+  getProfile,
+  updateProfile,
+  changePassword,
+  deleteAccount,
+  listUsers,
+  setUserSuspension,
 
   createPlace,
   getPlaceById,
@@ -146,6 +229,29 @@ module.exports = {
   listReviewsForPlace,
   updateReview,
   deleteReview,
+  listReviewsByUser,
+  createDetailedReview,
+  listDetailedReviewsForPlace,
+  setReviewHelpful,
+  reportReview,
+  listReportedReviews,
+  moderateReview,
+
+  savePlace,
+  unsavePlace,
+  listSavedPlaces,
+  listNearbyPlaces,
+  recommendPlaces,
+  listMyCollections,
+  createCollection,
+  getCollection,
+  updateCollection,
+  deleteCollection,
+  addCollectionItem,
+  removeCollectionItem,
+  setCollectionLayout,
+  getAdminStats,
+  recordPlaceView,
 };
 
 

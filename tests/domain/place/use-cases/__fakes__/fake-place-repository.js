@@ -14,9 +14,31 @@ class FakePlaceRepository {
     );
   }
 
+  async findApprovedWithin({ minLat, maxLat, minLng, maxLng, categoryId }) {
+    return this.rows.filter(
+      (p) =>
+        p.status === "approved" &&
+        p.latitude !== null && p.latitude !== undefined &&
+        p.longitude !== null && p.longitude !== undefined &&
+        Number(p.latitude) >= minLat && Number(p.latitude) <= maxLat &&
+        Number(p.longitude) >= minLng && Number(p.longitude) <= maxLng &&
+        (!categoryId || p.categoryId === categoryId),
+    );
+  }
+
   async create(data) {
+    // Mirror the database: nullable columns come back as null, not undefined.
     const row = {
       id: this.nextId++,
+      description: null,
+      address: null,
+      latitude: null,
+      longitude: null,
+      openingHours: null,
+      priceInfo: null,
+      priceLevel: null,
+      bestTime: null,
+      duration: null,
       status: "pending",
       createdAt: new Date(),
       updatedAt: new Date(),

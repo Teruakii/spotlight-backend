@@ -4,6 +4,8 @@ const userRoutes = require('./user-routes');
 const placeRoutes = require('./place-routes');
 const reviewRoutes = require('./review-routes');
 const categoryRoutes = require('./category-routes');
+const collectionRoutes = require('./collection-routes');
+const adminRoutes = require('./admin-routes');
 
 module.exports = function createRouter(deps) {
   const router = express.Router();
@@ -13,6 +15,8 @@ module.exports = function createRouter(deps) {
   router.use('/places', placeRoutes(deps));
   router.use('/reviews', reviewRoutes(deps).standalone);
   router.use('/categories', categoryRoutes(deps));
+  router.use('/collections', collectionRoutes(deps));
+  router.use('/admin', adminRoutes(deps));
 
   return router;
 };

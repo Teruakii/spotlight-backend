@@ -6,6 +6,10 @@ class User {
     email,
     role,
     permissions,
+    bio,
+    location,
+    avatarUrl,
+    coverUrl,
     isSuspended,
     lastLoginAt,
     passwordChangedAt,
@@ -18,6 +22,10 @@ class User {
     this.email = email;
     this.role = role;
     this.permissions = Array.isArray(permissions) ? permissions : [];
+    this.bio = bio ?? null;
+    this.location = location ?? null;
+    this.avatarUrl = avatarUrl ?? null;
+    this.coverUrl = coverUrl ?? null;
     this.isSuspended = isSuspended;
     this.lastLoginAt = lastLoginAt;
     this.passwordChangedAt = passwordChangedAt;

@@ -15,6 +15,11 @@ const makeListPendingPlacesController = require('../controllers/list-pending-pla
 const makeAddPlaceImageController = require('../controllers/add-place-image-controller');
 const makeDeletePlaceImageController = require('../controllers/delete-place-image-controller');
 const makeAddPlaceTransportController = require('../controllers/add-place-transport-controller');
+const makeSavePlaceController = require('../controllers/save-place-controller');
+const makeListNearbyPlacesController = require('../controllers/list-nearby-places-controller');
+const makeListPlacesNearPlaceController = require('../controllers/list-places-near-place-controller');
+const makeRecordPlaceViewController = require('../controllers/record-place-view-controller');
+const makeUnsavePlaceController = require('../controllers/unsave-place-controller');
 
 module.exports = function placeRoutes(deps) {
   const router = express.Router();
@@ -23,6 +28,7 @@ module.exports = function placeRoutes(deps) {
 
 
   router.get('/pending', auth, requirePermission('place:moderate'), makeListPendingPlacesController(deps));
+  router.get('/nearby', makeListNearbyPlacesController(deps));
   router.get('/', optAuth, makeListPlacesController(deps));
   router.post('/', auth, makeCreatePlaceController(deps));
   router.get('/:id', optAuth, makeGetPlaceController(deps));
@@ -34,6 +40,11 @@ module.exports = function placeRoutes(deps) {
   router.post('/:id/images', auth, makeAddPlaceImageController(deps));
   router.delete('/:id/images/:imageId', auth, makeDeletePlaceImageController(deps));
   router.post('/:id/transports', auth, makeAddPlaceTransportController(deps));
+
+  router.get('/:id/nearby', optAuth, makeListPlacesNearPlaceController(deps));
+  router.post('/:id/views', optAuth, makeRecordPlaceViewController(deps));
+  router.put('/:id/save', auth, makeSavePlaceController(deps));
+  router.delete('/:id/save', auth, makeUnsavePlaceController(deps));
 
   router.use('/:placeId/reviews', reviewRoutes(deps).nested);
 

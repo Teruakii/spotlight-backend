@@ -48,6 +48,44 @@ class PrismaUserRepository extends UserRepository {
     return this._flatten(record);
   }
 
+  async findAllForAdmin({ search, suspended, ids } = {}) {
+    const records = await this.prisma.user.findMany({
+      where: {
+        ...(ids ? { id: { in: ids } } : {}),
+        ...(suspended === undefined ? {} : { isSuspended: suspended }),
+        ...(search
+          ? {
+              OR: [
+                { firstName: { contains: search } },
+                { lastName: { contains: search } },
+                { email: { contains: search } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      include: { role: true, _count: { select: { places: true, reviews: true } } },
+    });
+    return records.map(({ role, _count, passwordHash, ...rest }) => ({
+      ...rest,
+      role: role ? role.name : null,
+      counts: _count,
+    }));
+  }
+
+  async countActivity(id) {
+    const record = await this.prisma.user.findUnique({
+      where: { id },
+      select: { _count: { select: { reviews: true, savedPlaces: true, places: true } } },
+    });
+    return record ? record._count : { reviews: 0, savedPlaces: 0, places: 0 };
+  }
+
+  async delete(id) {
+    await this.prisma.user.delete({ where: { id } });
+  }
+
   async recordLogin(id) {
     return this.prisma.user.update({
       where: { id },

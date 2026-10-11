@@ -6,6 +6,18 @@ datasource db {
   provider = "mysql"
 }
 
+enum ReportReason {
+  spam
+  offensive
+  misleading
+  other
+}
+
+enum ReportStatus {
+  open
+  dismissed
+}
+
 enum PlaceStatus {
   pending
   approved
@@ -13,14 +25,19 @@ enum PlaceStatus {
 }
 
 model User {
-  id                Int       @id @default(autoincrement())
-  firstName         String    @map("first_name")
-  lastName          String    @map("last_name")
-  email             String    @unique
-  passwordHash      String    @map("password_hash")
+  id           Int    @id @default(autoincrement())
+  firstName    String @map("first_name")
+  lastName     String @map("last_name")
+  email        String @unique
+  passwordHash String @map("password_hash")
 
-  roleId            Int       @map("role_id")
-  role              Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  roleId Int  @map("role_id")
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  bio       String? @db.Text
+  location  String? @db.VarChar(100)
+  avatarUrl String? @map("avatar_url") @db.VarChar(500)
+  coverUrl  String? @map("cover_url") @db.VarChar(500)
 
   isSuspended       Boolean   @default(false) @map("is_suspended")
   lastLoginAt       DateTime? @map("last_login_at")
@@ -28,19 +45,25 @@ model User {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  places  Place[]
-  reviews Review[]
+  places          Place[]
+  reviews         Review[]
+  savedPlaces     SavedPlace[]
+  helpfulVotes    ReviewHelpfulVote[]
+  collections     Collection[]
+  placeViews      PlaceView[]
+  reportsFiled    ReviewReport[]      @relation("ReportReporter")
+  reportsResolved ReviewReport[]      @relation("ReportResolver")
 
   @@index([roleId])
   @@map("users")
 }
 
 model Role {
-  id          Int              @id @default(autoincrement())
-  name        String           @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
   description String?
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   users       User[]
   permissions RolePermission[]
@@ -49,23 +72,23 @@ model Role {
 }
 
 model Permission {
-  id          Int              @id @default(autoincrement())
-  name        String           @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
   description String?
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  roles       RolePermission[]
+  roles RolePermission[]
 
   @@map("permissions")
 }
 
 model RolePermission {
-  roleId       Int        @map("role_id")
-  permissionId Int        @map("permission_id")
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
 
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
   @@index([permissionId])
@@ -98,11 +121,14 @@ model Place {
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
 
-  creator    User             @relation(fields: [createdBy], references: [id], onDelete: Restrict)
-  category   Category         @relation(fields: [categoryId], references: [id])
-  images     PlaceImage[]
-  transports PlaceTransport[]
-  reviews    Review[]
+  creator         User             @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  category        Category         @relation(fields: [categoryId], references: [id])
+  images          PlaceImage[]
+  transports      PlaceTransport[]
+  reviews         Review[]
+  savedBy         SavedPlace[]
+  collectionItems CollectionItem[]
+  views           PlaceView[]
 
   @@index([categoryId])
   @@index([status])
@@ -141,10 +167,126 @@ model Review {
   comment   String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
 
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experienceRating Int? @map("experience_rating") @db.TinyInt
+  valueRating      Int? @map("value_rating") @db.TinyInt
+  accessRating     Int? @map("access_rating") @db.TinyInt
+  atmosphereRating Int? @map("atmosphere_rating") @db.TinyInt
+
+  place        Place               @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images       ReviewImage[]
+  helpfulVotes ReviewHelpfulVote[]
+  reports      ReviewReport[]
 
   @@index([placeId])
   @@index([userId])
   @@map("reviews")
+}
+
+model SavedPlace {
+  userId    Int      @map("user_id")
+  placeId   Int      @map("place_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, placeId])
+  @@index([placeId])
+  @@map("saved_places")
+}
+
+model ReviewImage {
+  id       Int    @id @default(autoincrement())
+  reviewId Int    @map("review_id")
+  imageUrl String @map("image_url") @db.VarChar(500)
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("review_images")
+}
+
+model ReviewHelpfulVote {
+  reviewId  Int      @map("review_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([reviewId, userId])
+  @@index([userId])
+  @@map("review_helpful_votes")
+}
+
+model Collection {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  isPrivate   Boolean  @default(true) @map("is_private")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CollectionItem[]
+
+  @@index([userId])
+  @@map("collections")
+}
+
+model CollectionItem {
+  id           Int      @id @default(autoincrement())
+  collectionId Int      @map("collection_id")
+  placeId      Int      @map("place_id")
+  day          Int      @default(1)
+  position     Int
+  startTime    String?  @map("start_time") @db.Char(5)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  place      Place      @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, placeId])
+  @@index([collectionId, day, position])
+  @@index([placeId])
+  @@map("collection_items")
+}
+
+model PlaceView {
+  id        Int      @id @default(autoincrement())
+  placeId   Int      @map("place_id")
+  userId    Int?     @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([placeId])
+  @@index([userId])
+  @@map("place_views")
+}
+
+model ReviewReport {
+  id           Int          @id @default(autoincrement())
+  reviewId     Int          @map("review_id")
+  reporterId   Int          @map("reporter_id")
+  reason       ReportReason
+  details      String?      @db.Text
+  status       ReportStatus @default(open)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  resolvedAt   DateTime?    @map("resolved_at")
+  resolvedById Int?         @map("resolved_by_id")
+
+  review     Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reporter   User   @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User?  @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@unique([reviewId, reporterId])
+  @@index([status])
+  @@index([reporterId])
+  @@index([resolvedById])
+  @@map("review_reports")
 }
