@@ -16,7 +16,7 @@ function handle(run, status = 200) {
 module.exports = function adminRoutes(deps) {
   const router = express.Router();
   const auth = authenticate(deps);
-  const { getAdminStats, listReportedReviews, moderateReview } = deps;
+  const { getAdminStats, listReportedReviews, moderateReview, listUsers, setUserSuspension } = deps;
 
   router.get('/stats', auth, requirePermission('place:moderate'), handle((req) => getAdminStats.execute(req.query.period)));
   router.get('/reports', auth, requirePermission('review:manage_any'), handle(() => listReportedReviews.execute()));
@@ -25,6 +25,14 @@ module.exports = function adminRoutes(deps) {
     auth,
     requirePermission('review:manage_any'),
     handle((req) => moderateReview.execute(req.user, req.params.id, req.body), 204),
+  );
+
+  router.get('/users', auth, requirePermission('user:manage'), handle((req) => listUsers.execute(req.query)));
+  router.patch(
+    '/users/:id/suspension',
+    auth,
+    requirePermission('user:manage'),
+    handle((req) => setUserSuspension.execute(req.user, req.params.id, req.body)),
   );
 
   return router;
