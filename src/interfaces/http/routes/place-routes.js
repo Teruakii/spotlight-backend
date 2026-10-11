@@ -15,6 +15,8 @@ const makeListPendingPlacesController = require('../controllers/list-pending-pla
 const makeAddPlaceImageController = require('../controllers/add-place-image-controller');
 const makeDeletePlaceImageController = require('../controllers/delete-place-image-controller');
 const makeAddPlaceTransportController = require('../controllers/add-place-transport-controller');
+const makeSavePlaceController = require('../controllers/save-place-controller');
+const makeUnsavePlaceController = require('../controllers/unsave-place-controller');
 
 module.exports = function placeRoutes(deps) {
   const router = express.Router();
@@ -34,6 +36,9 @@ module.exports = function placeRoutes(deps) {
   router.post('/:id/images', auth, makeAddPlaceImageController(deps));
   router.delete('/:id/images/:imageId', auth, makeDeletePlaceImageController(deps));
   router.post('/:id/transports', auth, makeAddPlaceTransportController(deps));
+
+  router.put('/:id/save', auth, makeSavePlaceController(deps));
+  router.delete('/:id/save', auth, makeUnsavePlaceController(deps));
 
   router.use('/:placeId/reviews', reviewRoutes(deps).nested);
 
