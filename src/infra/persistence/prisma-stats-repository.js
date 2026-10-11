@@ -56,7 +56,7 @@ class PrismaStatsRepository extends StatsRepository {
   }
 
   async recentActivity(limit) {
-    const [places, reviews] = await Promise.all([
+    const [places, reviews, reports] = await Promise.all([
       this.prisma.place.findMany({
         orderBy: { createdAt: 'desc' },
         take: limit,
@@ -71,6 +71,11 @@ class PrismaStatsRepository extends StatsRepository {
           place: { select: { id: true, name: true } },
           user: { select: { firstName: true } },
         },
+      }),
+      this.prisma.reviewReport.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: { reason: true, createdAt: true, review: { select: { place: { select: { id: true, name: true } } } } },
       }),
     ]);
 
@@ -87,6 +92,13 @@ class PrismaStatsRepository extends StatsRepository {
         title: `New ${r.rating}★ review`,
         detail: `${r.place.name} · by ${r.user.firstName}`,
         placeId: r.place.id,
+        at: r.createdAt,
+      })),
+      ...reports.map((r) => ({
+        type: 'review_reported',
+        title: 'Review reported',
+        detail: `${r.review.place.name} · ${r.reason}`,
+        placeId: r.review.place.id,
         at: r.createdAt,
       })),
     ]

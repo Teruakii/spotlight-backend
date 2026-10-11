@@ -9,6 +9,7 @@ const makeCreateDetailedReviewController = require("../controllers/create-detail
 const makeListDetailedReviewsController = require("../controllers/list-detailed-reviews-controller");
 const makeMarkReviewHelpfulController = require("../controllers/mark-review-helpful-controller");
 const makeUnmarkReviewHelpfulController = require("../controllers/unmark-review-helpful-controller");
+const makeReportReviewController = require("../controllers/report-review-controller");
 
 module.exports = function reviewRoutes(deps) {
   const auth = authenticate(deps);
@@ -25,6 +26,7 @@ module.exports = function reviewRoutes(deps) {
   standalone.delete("/:id", auth, makeDeleteReviewController(deps));
   standalone.put("/:id/helpful", auth, makeMarkReviewHelpfulController(deps));
   standalone.delete("/:id/helpful", auth, makeUnmarkReviewHelpfulController(deps));
+  standalone.post("/:id/report", auth, makeReportReviewController(deps));
 
   return { nested, standalone };
 };

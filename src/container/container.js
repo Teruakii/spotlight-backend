@@ -12,6 +12,7 @@ const PrismaRoleRepository = require("../infra/persistence/prisma-role-repositor
 const PrismaSavedPlaceRepository = require("../infra/persistence/prisma-saved-place-repository");
 const PrismaCollectionRepository = require("../infra/persistence/prisma-collection-repository");
 const PrismaStatsRepository = require("../infra/persistence/prisma-stats-repository");
+const PrismaReviewReportRepository = require("../infra/persistence/prisma-review-report-repository");
 const BcryptPasswordHasher = require("../infra/security/bcrypt-password-hasher");
 const JwtTokenService = require("../infra/security/jwt-token-service");
 
@@ -68,6 +69,11 @@ const ListReviewsByUser = require("../domain/review/use-cases/list-reviews-by-us
 const CreateDetailedReview = require("../domain/review/use-cases/create-detailed-review");
 const ListDetailedReviewsForPlace = require("../domain/review/use-cases/list-detailed-reviews-for-place");
 const SetReviewHelpful = require("../domain/review/use-cases/set-review-helpful");
+const {
+  ReportReview,
+  ListReportedReviews,
+  ModerateReview,
+} = require("../domain/review/use-cases/review-moderation");
 
 // --- Saved place use cases ---
 const SavePlace = require("../domain/saved-place/use-cases/save-place");
@@ -116,6 +122,7 @@ const roleRepository = new PrismaRoleRepository(prisma);
 const savedPlaceRepository = new PrismaSavedPlaceRepository(prisma);
 const collectionRepository = new PrismaCollectionRepository(prisma);
 const statsRepository = new PrismaStatsRepository(prisma);
+const reviewReportRepository = new PrismaReviewReportRepository(prisma);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService(
   process.env.JWT_SECRET,
@@ -159,6 +166,9 @@ const listReviewsByUser = new ListReviewsByUser(reviewRepository);
 const createDetailedReview = new CreateDetailedReview(reviewRepository, placeRepository);
 const listDetailedReviewsForPlace = new ListDetailedReviewsForPlace(reviewRepository);
 const setReviewHelpful = new SetReviewHelpful(reviewRepository);
+const reportReview = new ReportReview(reviewRepository, reviewReportRepository);
+const listReportedReviews = new ListReportedReviews(reviewReportRepository);
+const moderateReview = new ModerateReview(reviewRepository, reviewReportRepository);
 
 // --- Saved place use cases ---
 const savePlace = new SavePlace(savedPlaceRepository, getPlaceById);
@@ -218,6 +228,9 @@ module.exports = {
   createDetailedReview,
   listDetailedReviewsForPlace,
   setReviewHelpful,
+  reportReview,
+  listReportedReviews,
+  moderateReview,
 
   savePlace,
   unsavePlace,
