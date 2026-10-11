@@ -47,6 +47,9 @@ const ListReviewsForPlace = require("../domain/review/use-cases/list-reviews-for
 const UpdateReview = require("../domain/review/use-cases/update-review");
 const DeleteReview = require("../domain/review/use-cases/delete-review");
 const ListReviewsByUser = require("../domain/review/use-cases/list-reviews-by-user");
+const CreateDetailedReview = require("../domain/review/use-cases/create-detailed-review");
+const ListDetailedReviewsForPlace = require("../domain/review/use-cases/list-detailed-reviews-for-place");
+const SetReviewHelpful = require("../domain/review/use-cases/set-review-helpful");
 
 // --- Saved place use cases ---
 const SavePlace = require("../domain/saved-place/use-cases/save-place");
@@ -133,6 +136,9 @@ const listReviewsForPlace = new ListReviewsForPlace(reviewRepository);
 const updateReview = new UpdateReview(reviewRepository);
 const deleteReview = new DeleteReview(reviewRepository);
 const listReviewsByUser = new ListReviewsByUser(reviewRepository);
+const createDetailedReview = new CreateDetailedReview(reviewRepository, placeRepository);
+const listDetailedReviewsForPlace = new ListDetailedReviewsForPlace(reviewRepository);
+const setReviewHelpful = new SetReviewHelpful(reviewRepository);
 
 // --- Saved place use cases ---
 const savePlace = new SavePlace(savedPlaceRepository, getPlaceById);
@@ -173,6 +179,9 @@ module.exports = {
   updateReview,
   deleteReview,
   listReviewsByUser,
+  createDetailedReview,
+  listDetailedReviewsForPlace,
+  setReviewHelpful,
 
   savePlace,
   unsavePlace,
